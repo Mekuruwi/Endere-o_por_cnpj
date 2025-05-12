@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CNPJ</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #001e3c, #003c6c, #005a9e);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgb(221, 221, 221) ;
+            color: #001e3c;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 30, 60, 0.3);
+            max-width: 800px;
+            width: 90%;
+            text-align: left;
+        }
+        h1 {
+            color: #005a9e;
+            font-size: 28px;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        input[type="file"] {
+            width: auto;
+        }
+        button {
+            background-color: #005a9e;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #004080;
+        }
+        .resultado {
+            margin-top: 20px;
+            background-color: #f4f6f8;
+            color: #001e3c;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+        }
+        .resultado p {
+            margin: 10px 0;
+        }
+        .resultado strong {
+            color: #005a9e;
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Consulta CNPJ</h1>
+
+        <textarea id="cnpj-input" rows="6" placeholder="Coloque os CNPJs aqui, um por linha (ou suba um arquivo)"></textarea>
+
+        <input type="file" id="file-upload" accept=".txt,.csv,.xlsx" />
+        
+        <button onclick="consultarCNPJ()">Consultar</button>
+
+        <div id="resultado" class="resultado"></div>
+
+        <button onclick="baixarResultado()">Baixar Resultado (XLSX)</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <script>
+        let resultados = [];
+
+        // Função para consultar CNPJ
+        function consultarCNPJ() {
+            const cnpjInput = document.getElementById('cnpj-input').value.trim();
+            const fileInput = document.getElementById('file-upload');
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = "Consultando...";
+            resultadoDiv.classList.remove("fade-in");
+            document.getElementById('cnpj-input').value = '';
+
+            let cnpjs = [];
+
+            // Se tiver arquivo, lê o arquivo
+            if (fileInput.files.length > 0) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileContent = e.target.result;
+                    const extension = fileInput.files[0].name.split('.').pop().toLowerCase();
+                    
+                    if (extension === 'xlsx') {
+                        const workbook = XLSX.read(fileContent, { type: 'binary' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        cnpjs = XLSX.utils.sheet_to_json(sheet, { header: 1 }).map(row => row[0]).filter(cnpj => cnpj);
+                    } else if (extension === 'txt') {
+                        cnpjs = fileContent.split('\n').map(line => line.trim()).filter(line => line);
+                    } else if (extension === 'csv') {
+                        const csv = fileContent.split('\n').map(line => line.trim()).filter(line => line);
+                        cnpjs = csv;
+                    }
+
+                    processCNPJs(cnpjs);
+                };
+                reader.readAsBinaryString(fileInput.files[0]);
+            } else {
+                // Se tiver CNPJs digitados
+                cnpjs = cnpjInput.split('\n').map(cnpj => cnpj.trim()).filter(cnpj => cnpj);
+                processCNPJs(cnpjs);
+            }
+        }
+
+        // Função que processa os CNPJs
+        function processCNPJs(cnpjs) {
+            const resultadoDiv = document.getElementById('resultado');
+            resultados = [];
+
+            let promises = cnpjs.map(cnpj => {
+                return fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj.replace(/\D/g, '')}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultado = {
+                            cnpj,
+                            razao_social: data.razao_social || 'Não informado',
+                            nome_fantasia: data.nome_fantasia || 'Não informado',
+                            endereco: `${data.logradouro || ''}, ${data.numero || ''} - ${data.bairro || ''}, ${data.municipio || ''} - ${data.uf || ''}, ${data.cep || ''}`
+                        };
+                        resultados.push(resultado);
+                    })
+                    .catch(err => {
+                        resultados.push({ cnpj, erro: "Erro na consulta!" });
+                    });
+            });
+
+            Promise.all(promises).then(() => {
+                // Exibe os resultados de maneira mais bonitinha
+                resultadoDiv.innerHTML = resultados.map(item => {
+                    return `
+                        <div>
+                            <p><strong>CNPJ:</strong> ${item.cnpj}</p>
+                            <p><strong>Razão Social:</strong> ${item.razao_social}</p>
+                            <p><strong>Nome Fantasia:</strong> ${item.nome_fantasia}</p>
+                            <p><strong>Endereço:</strong> ${item.endereco}</p>
+                            <hr>
+                        </div>
+                    `;
+                }).join('');
+                resultadoDiv.classList.add("fade-in");
+            });
+        }
+
+        // Função para baixar o resultado em XLSX
+        function baixarResultado() {
+            const ws = XLSX.utils.json_to_sheet(resultados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Resultado CNPJ');
+            XLSX.writeFile(wb, 'resultado_cnpj.xlsx');
+        }
+    </script>
+
+</body>
+</html>
