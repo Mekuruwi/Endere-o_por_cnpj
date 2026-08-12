@@ -770,13 +770,11 @@
 
       div.innerHTML = `
         ${criarLinhaComCopia('CNPJ', item.cnpj)}
-        <p><strong>Razão Social:</strong> ${razaoSocialContent}</p>
-        ${!isError ? `
+        ${criarLinhaComCopia('Razão Social', item.razao_social)}
         ${criarLinhaComCopia('Nome Fantasia', item.nome_fantasia)}
         ${criarLinhaComCopia('Endereço', item.endereco)}
         ${criarLinhaComCopia('Natureza', item.natureza_juridica)}
         ${criarLinhaComCopia('Situação', item.situacao_cadastral)}
-        ` : ''}
       `;
       listaDiv.insertBefore(div, listaDiv.firstChild);
     }
