@@ -434,6 +434,39 @@
       color: var(--dasa-blue-primary);
     }
 
+    .copy-icon.copied {
+      color: #27ae60;
+      opacity: 1;
+      animation: pulse 0.3s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .copy-tooltip {
+      position: fixed;
+      background: var(--dasa-blue-primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .copy-tooltip.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .result-item .error {
       color: var(--dasa-red-accent);
       font-weight: 600;
@@ -756,7 +789,7 @@
           <p>
             <strong>${label}:</strong> 
             <span class="value">${valor}</span>
-            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="copiarTexto('${valor.replace(/'/g, "\\'")}')" title="Copiar">
+            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="copiarTexto('${valor.replace(/'/g, "\\'")}', this)" title="Copiar">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
@@ -779,13 +812,59 @@
       listaDiv.insertBefore(div, listaDiv.firstChild);
     }
 
-    function copiarTexto(texto) {
+    function copiarTexto(texto, elemento) {
       navigator.clipboard.writeText(texto).then(() => {
-        // Feedback visual opcional
-        console.log('Texto copiado:', texto);
+        // Feedback visual no ícone
+        if (elemento) {
+          elemento.classList.add('copied');
+          setTimeout(() => {
+            elemento.classList.remove('copied');
+          }, 1500);
+        }
+        
+        // Mostrar tooltip de confirmação
+        mostrarTooltip('Copiado!', elemento);
       }).catch(err => {
         console.error('Erro ao copiar:', err);
+        mostrarTooltip('Erro ao copiar', elemento);
       });
+    }
+
+    function mostrarTooltip(mensagem, elemento) {
+      // Remove tooltip existente se houver
+      const tooltipExistente = document.querySelector('.copy-tooltip');
+      if (tooltipExistente) {
+        tooltipExistente.remove();
+      }
+
+      // Cria novo tooltip
+      const tooltip = document.createElement('div');
+      tooltip.className = 'copy-tooltip';
+      tooltip.textContent = mensagem;
+      document.body.appendChild(tooltip);
+
+      // Posiciona o tooltip próximo ao elemento clicado
+      if (elemento) {
+        const rect = elemento.getBoundingClientRect();
+        tooltip.style.left = Math.max(10, rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
+        tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+      } else {
+        // Posição padrão (centro superior da tela)
+        tooltip.style.left = '50%';
+        tooltip.style.top = '80px';
+        tooltip.style.transform = 'translateX(-50%)';
+      }
+
+      // Anima para mostrar
+      requestAnimationFrame(() => {
+        tooltip.classList.add('show');
+      });
+
+      // Remove após 2 segundos
+      setTimeout(() => {
+        tooltip.classList.remove('show');
+        setTimeout(() => tooltip.remove(), 300);
+      }, 2000);
     }
 
     document.getElementById('cnpj-input').addEventListener('keydown', function(event) {
