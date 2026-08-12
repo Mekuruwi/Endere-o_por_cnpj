@@ -420,6 +420,20 @@
       flex: 1;
     }
 
+    .copy-icon {
+      cursor: pointer;
+      margin-left: 8px;
+      opacity: 0.6;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .copy-icon:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      color: var(--dasa-blue-primary);
+    }
+
     .result-item .error {
       color: var(--dasa-red-accent);
       font-weight: 600;
@@ -451,7 +465,7 @@
       <div class="header">
         <div class="logo-wrapper">
           <div class="logo-icon">D</div>
-          <span class="logo-text">Dasa • Ferramenta Interna</span>
+          <span class="logo-text">Ferramenta de Consulta</span>
         </div>
         <h1>Consulta CNPJ</h1>
         <p class="subtitle">Insira os CNPJs manualmente ou faça o upload de um arquivo para consulta em lote.</p>
@@ -734,21 +748,46 @@
       const div = document.createElement('div');
       div.className = 'result-item';
       const isError = !!item.erro;
+      
+      // Função para criar linha com ícone de cópia
+      const criarLinhaComCopia = (label, valor) => {
+        if (!valor || valor === '-') return `<p><strong>${label}:</strong> <span class="value">-</span></p>`;
+        return `
+          <p>
+            <strong>${label}:</strong> 
+            <span class="value">${valor}</span>
+            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="copiarTexto('${valor.replace(/'/g, "\\'")}')" title="Copiar">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </p>
+        `;
+      };
+
       const razaoSocialContent = isError 
         ? `<span class="error">${item.erro}</span>` 
-        : `<span class="value">${item.razao_social}</span>`;
+        : `${criarLinhaComCopia('Razão Social', item.razao_social).replace('<p><strong>Razão Social:</strong>', '').replace('</p>', '')}`;
 
       div.innerHTML = `
-        <p><strong>CNPJ:</strong> <span class="value">${item.cnpj}</span></p>
+        ${criarLinhaComCopia('CNPJ', item.cnpj)}
         <p><strong>Razão Social:</strong> ${razaoSocialContent}</p>
         ${!isError ? `
-        <p><strong>Nome Fantasia:</strong> <span class="value">${item.nome_fantasia || '-'}</span></p>
-        <p><strong>Endereço:</strong> <span class="value">${item.endereco || '-'}</span></p>
-        <p><strong>Natureza:</strong> <span class="value">${item.natureza_juridica || '-'}</span></p>
-        <p><strong>Situação:</strong> <span class="value">${item.situacao_cadastral || '-'}</span></p>
+        ${criarLinhaComCopia('Nome Fantasia', item.nome_fantasia)}
+        ${criarLinhaComCopia('Endereço', item.endereco)}
+        ${criarLinhaComCopia('Natureza', item.natureza_juridica)}
+        ${criarLinhaComCopia('Situação', item.situacao_cadastral)}
         ` : ''}
       `;
       listaDiv.insertBefore(div, listaDiv.firstChild);
+    }
+
+    function copiarTexto(texto) {
+      navigator.clipboard.writeText(texto).then(() => {
+        // Feedback visual opcional
+        console.log('Texto copiado:', texto);
+      }).catch(err => {
+        console.error('Erro ao copiar:', err);
+      });
     }
 
     document.getElementById('cnpj-input').addEventListener('keydown', function(event) {
