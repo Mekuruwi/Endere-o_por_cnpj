@@ -27,6 +27,66 @@ body {
   min-height: 100vh;
   padding: 20px;
   -webkit-font-smoothing: antialiased;
+  gap: 20px;
+}
+
+/* --- Bloco Lateral para Ads --- */
+.ads-sidebar {
+  display: none;
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  width: 320px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1200px) {
+  .ads-sidebar {
+    display: block;
+  }
+}
+
+.ads-container {
+  background: var(--dasa-white);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(27, 79, 138, 0.1);
+  border: 1px solid var(--dasa-gray-border);
+}
+
+.ad-space {
+  width: 100%;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-placeholder {
+  width: 100%;
+  height: 600px;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+  border: 2px dashed var(--dasa-blue-primary);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--dasa-text-secondary);
+  text-align: center;
+  padding: 20px;
+}
+
+.ad-placeholder span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dasa-blue-dark);
+  margin-bottom: 8px;
+}
+
+.ad-placeholder small {
+  font-size: 0.85rem;
+  color: var(--dasa-text-secondary);
 }
 
 .container {
@@ -480,5 +540,8 @@ button {
   }
   h1 {
     font-size: 1.5rem;
+  }
+  .ads-sidebar {
+    display: none !important;
   }
 }
