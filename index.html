@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta CNPJ - Dasa</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="container somente-esquerda">
+    <div class="left-panel">
+      <div class="header">
+        <div class="logo-wrapper">
+          <div class="logo-icon">D</div>
+          <span class="logo-text">Ferramenta de Consulta</span>
+        </div>
+        <h1>Consulta CNPJ</h1>
+        <p class="subtitle">Insira os CNPJs manualmente ou faça o upload de um arquivo para consulta em lote.</p>
+      </div>
+      
+      <textarea id="cnpj-input" placeholder="Digite os CNPJs, um por linha..."></textarea>
+      
+      <div class="file-input-wrapper">
+        <label for="file-upload" class="file-input-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span id="file-name-display">Selecionar arquivo (.xlsx, .csv, .txt)</span>
+        </label>
+        <input type="file" id="file-upload" accept=".xlsx,.csv,.txt" />
+      </div>
+      
+      <button id="consultar-btn" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Consultar CNPJs
+      </button>
+    </div>
+
+    <div class="right-panel">
+      <div class="progress-info">
+        <div class="progress-header" onclick="toggleProgress()">
+          <span class="progress-header-title">Andamento da Consulta</span>
+          <svg id="chevron-icon" class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="progress-content" id="progress-content">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Status Atual</span>
+              <span class="stat-value" id="cnpj-atual" style="font-size: 0.9rem; word-break: break-all;">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Tentativa</span>
+              <span class="stat-value" id="tentativa-atual">1</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Concluídos</span>
+              <span class="stat-value" id="ja-feito">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Faltam</span>
+              <span class="stat-value" id="faltam">0</span>
+            </div>
+            <div class="stat-item full-width">
+              <span class="stat-label">Tempo Restante</span>
+              <span class="stat-value" id="tempo-restante">-</span>
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="lista-resultados" class="result-list"></div>
+
+      <button id="baixar-btn" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar XLSX
+      </button>
+    </div>
+  </div>
+  
+  <!-- Bloco Lateral para Ads -->
+  <aside class="ads-sidebar">
+    <div class="ads-container">
+      <div class="ad-space">
+        <div class="ad-placeholder">
+          <span>Espaço para Anúncio</span>
+          <small>300x600px</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
